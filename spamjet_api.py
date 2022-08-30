@@ -73,9 +73,6 @@ class HttpSpammer:
     def stop(self):
         self.isactive = False
 
-with open('settings.txt', mode='r') as settingsfile:
-    settings = eval(settingsfile.read())
-
 all_spammers = []
 
 def stop_all():
