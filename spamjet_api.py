@@ -8,7 +8,7 @@ from time import sleep, time
 __doc__ = """Tool for stress-testing (trolling) websites ;)
 100 threads for best performance, obliterates middle-end websites"""
 
-__version__ = "SpamJet API 1.02"
+__version__ = "SpamJet API 1.03"
 
 
 class HttpSpammer:
@@ -67,6 +67,7 @@ class HttpSpammer:
                 self.isconnected = False
 
     def start(self):
+        all_spammers.append(self)
         if self.isactive:
             raise RuntimeError('HttpSpammer already active')
         else:
@@ -75,10 +76,9 @@ class HttpSpammer:
                 thread.start()
 
     def stop(self):
+        all_spammers.remove(self)
         self.isactive = False
 
-with open('settings.txt', mode='r') as settingsfile:
-    settings = eval(settingsfile.read())
 
 all_spammers = []
 
@@ -86,11 +86,8 @@ def stop_all():
     for spammer in all_spammers:
         spammer.stop()
 
-    all_spammers.clear()  # Discard all references to spammers
-
 def stop_spammers(target):
     """Stop all spammers with given target"""
     for spammer in all_spammers.copy():
         if spammer.target == target:
             spammer.stop()
-            all_spammers.remove(spammer)
