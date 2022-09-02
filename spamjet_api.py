@@ -67,7 +67,6 @@ class HttpSpammer:
                 self.isconnected = False
 
     def start(self):
-        all_spammers.append(self)
         if self.isactive:
             raise RuntimeError('HttpSpammer already active')
         else:
@@ -76,8 +75,8 @@ class HttpSpammer:
                 thread.start()
 
     def stop(self):
-        all_spammers.remove(self)
         self.isactive = False
+        all_spammers.remove(self)
 
 
 all_spammers = []
