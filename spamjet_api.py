@@ -37,6 +37,10 @@ class HttpSpammer:
             except ConnectionRefusedError as e:  # Usually caused by server actively refusing connection
                 if self.verbose:
                     print('ERROR: ' + e)
+                    
+            except requests.exceptions.ConnectionError as e:
+                if self.verbose:
+                    print('ERROR: ' + e)
 
     def connect(self, url, thread_count, mode = 'GET', body = '', user_agent = 'Mozilla/5.0'):
         if self.isconnected:
